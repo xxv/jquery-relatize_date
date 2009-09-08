@@ -1,17 +1,21 @@
 // All credit goes to Rick Olson.
+// Made completely relative with <abbr/> tags by Steve Pomeroy.
 (function($) {
   $.fn.relatizeDate = function() {
     return $(this).each(function() {
-      $(this).text( $.relatizeDate(this) )
+        var abbr = $('<abbr/>');
+        $(abbr).attr('title', $(this).text());
+        $(abbr).text($.relatizeDate(this)); 
+      $(this).replaceWith( abbr );
     })
   }
 
   $.relatizeDate = function(element) {
-    return $.relatizeDate.timeAgoInWords( new Date($(element).text()) )
+    return $.relatizeDate.timeAgoInWords( new Date($(element).text()) );
   }
 
   // shortcut
-  $r = $.relatizeDate
+  $r = $.relatizeDate;
 
   $.extend($.relatizeDate, {
     shortDays: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
@@ -67,6 +71,10 @@
      */
     distanceOfTimeInWords: function(fromTime, toTime, includeTime) {
       var delta = parseInt((toTime.getTime() - fromTime.getTime()) / 1000);
+      var s_in_day   = 86400;
+      var s_in_week  = 604800;
+      var s_in_month = 2629744;
+      var s_in_year  = 31556926;
       if (delta < 60) {
           return 'less than a minute ago';
       } else if (delta < 120) {
@@ -75,19 +83,24 @@
           return (parseInt(delta / 60)).toString() + ' minutes ago';
       } else if (delta < (120*60)) {
           return 'about an hour ago';
-      } else if (delta < (24*60*60)) {
+      } else if (delta < (s_in_day)) {
           return 'about ' + (parseInt(delta / 3600)).toString() + ' hours ago';
-      } else if (delta < (48*60*60)) {
-          return '1 day ago';
+      } else if (delta < (2*s_in_day)) {
+          return 'yesterday';
+      } else if (delta < (s_in_week)) {
+        return (parseInt(delta / s_in_day)).toString() + " days ago";
+      }else if (delta < (2*s_in_week)){
+        return '1 week ago';
+      }else if (delta < (s_in_month)){
+        return parseInt(delta / s_in_week).toString() + ' weeks ago';
+      }else if (delta < (2*s_in_month)){
+        return '1 month ago';
+      }else if (delta < (s_in_year)){
+        return parseInt(delta / s_in_month).toString() + ' months ago';
+      }else if (delta < (2*s_in_year)){
+          return '1 year ago';
       } else {
-        var days = (parseInt(delta / 86400)).toString();
-        if (days > 5) {
-          var fmt  = '%B %d, %Y'
-          if (includeTime) fmt += ' %I:%M %p'
-          return $r.strftime(fromTime, fmt);
-        } else {
-          return days + " days ago"
-        }
+        return parseInt(delta / s_in_year).toString() + ' years ago';
       }
     }
   })
